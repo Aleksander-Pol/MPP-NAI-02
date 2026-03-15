@@ -11,9 +11,12 @@ class Program
 
 class Calssifier
 {
+    private static double[][] iris;
+    
+    
     public double Distance(double[] a,  double[] b)
     {
-        if (a.Length != b.Length)
+        if (a.Length == b.Length)
         {
             double dist = 0.0;
 
