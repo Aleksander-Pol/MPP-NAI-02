@@ -4,6 +4,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        string text = File.ReadAllText("iris.txt");
+        Console.WriteLine(text);
     }
 }
