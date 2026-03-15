@@ -8,3 +8,21 @@ class Program
         Console.WriteLine(text);
     }
 }
+
+class Calssifier
+{
+    public double Distance(double[] a,  double[] b)
+    {
+        if (a.Length != b.Length)
+        {
+            double dist = 0.0;
+
+            for (int i = 0; i < a.Length; i++)
+                dist += Math.Pow(Math.Abs(a[i] - b[i]), 2);
+
+            return Math.Sqrt(dist);
+        }
+        else
+            return -1.0;
+    }
+}
