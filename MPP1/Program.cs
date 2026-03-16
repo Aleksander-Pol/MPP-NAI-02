@@ -7,11 +7,18 @@ class Program
     static void Main(string[] args)
     {
         string text = File.ReadAllText("iris.txt");
+        double[][] irisVals = Classifier.FormatString(text);
+    }
+}
+
+public class Classifier
+{
+    public static double[][] FormatString(string text)
+    {
         
         string[] lines = text.Split('\n');
         double[][] iris_vals = new double[lines.Length][];
         
-
         for (int i = 1; i < lines.Length; i++)
         {
             string[] tempArr= lines[i].Split(',');
@@ -25,24 +32,9 @@ class Program
             }
             
         }
-    }
-}
-
-public static class Calssifier
-{
-    private static List<int>[] iris_values;
-
-
-
-    public static void FormatString(string text)
-    {
-        string[] lines = text.Split('\n');
-
-        for (int i = 1; i < lines.Length; i++)
-        {
-            double[] tempArr= lines[i].Split(',').Select(double.Parse).ToArray();
-            Console.WriteLine(tempArr[i]);
-        }
+        
+        
+        return iris_vals;
     }
     
     
