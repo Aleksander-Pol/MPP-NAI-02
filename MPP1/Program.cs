@@ -17,24 +17,29 @@ public class Classifier
     {
         
         string[] lines = text.Split('\n');
-        double[][] iris_vals = new double[lines.Length][];
+        double[][] irisVals = new double[lines.Length][];
+        string[] irisNames = new string[lines.Length];
         
         for (int i = 1; i < lines.Length; i++)
         {
             string[] tempArr= lines[i].Split(',');
-            
+                        
 
-            iris_vals[i] = new double[4];
+            irisVals[i] = new double[4];
             for (int j = 0; j < 4; j++)
             {
-                iris_vals[i][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
-                Console.WriteLine(iris_vals[i][j]);
+                irisVals[i][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
+                Console.WriteLine(irisVals[i][j]);
             }
+            
+            
+            irisNames[i] = tempArr[4];
+            Console.WriteLine(irisNames[i]);
             
         }
         
         
-        return iris_vals;
+        return irisVals;
     }
     
     
