@@ -71,7 +71,7 @@ public class Classifier
 
     public  void ClassifyVector(double[] newVector)
     {
-        Console.WriteLine(Knn(10,  newVector));
+        Console.WriteLine(Knn(10,  newVector, _irisVals,  _irisNames));
     }
 
     public  void ClassifyFile(string fileName)
@@ -88,16 +88,16 @@ public class Classifier
             for (int j = 0; j < 4; j++)
                 userVals[i][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
 
-            Console.WriteLine(Knn(10, userVals[i]));
+            Console.WriteLine(Knn(10, userVals[i], _irisVals, _irisNames));
                 
         }
         
 
     }
 
-    public  string Knn(int k, double[] newVector)
+    public  string Knn(int k, double[] newVector, double[][] values, string[] names)
     {
-        double[] distances = new double[_irisNames.Length];
+        double[] distances = new double[names.Length];
         Dictionary<string, int> irisResArr = new Dictionary<string, int>()
         {
             { "Iris-setosa", 0},
@@ -107,20 +107,20 @@ public class Classifier
 
         for (int i = 0; i < distances.Length; i++)
         {
-            distances[i] = Distance(_irisVals[i], newVector);
+            distances[i] = Distance(values[i], newVector);
             for (int j = 0; j < i; j++)
             {
                 if (distances[i] < distances[j])
                 {
                     (distances[i], distances[j]) = (distances[j], distances[i]);
-                    (_irisNames[i], _irisNames[j]) =  (_irisNames[j], _irisNames[i]);
-                    (_irisVals[i], _irisVals[j]) =  (_irisVals[j], _irisVals[i]);
+                    (names[i], names[j]) =  (names[j], names[i]);
+                    (values[i], values[j]) =  (values[j], values[i]);
                 }
             }
         }
         
         for (int i = 0; i < k; i++)
-            irisResArr[_irisNames[i]]++;
+            irisResArr[names[i]]++;
 
         var maxKvp = irisResArr.MaxBy(x => x.Value);
         
@@ -149,6 +149,21 @@ public class Classifier
                 testSetNames.Add(_irisNames[i]);
             }
         }
+
+        List<int> resultTable = new List<int>();
+        for (int i = 0; i < testSetVals.Count; i++)
+        {
+            if (Knn(11, testSetVals[i], trainingSetVals.ToArray(), trainingSetNames.ToArray()) == testSetNames[i])
+            {
+                resultTable.Add(1);
+            }
+            else
+                resultTable.Add(0);
+        }
+        
+        double result = (double)resultTable.Sum()/(double)resultTable.Count * 100;
+
+        Console.WriteLine($"Udało się zdobyć - {result}%");
     }
         
 }
