@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Security.AccessControl;
 
 namespace MPP1;
 
@@ -6,23 +7,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        string text = File.ReadAllText("iris.txt");
-        double[][] irisVals = Classifier.FormatString(text);
+        Classifier classifier = new Classifier("iris.txt");
+        classifier.trainData();
 
-       Classifier.ClassifyFile("temp.txt");
-        
     }
 }
 
 public class Classifier
 {
-    private static double[][] _irisVals = null!;
-    private static string[] _irisNames = null!;
-    
-    
-    public static double[][] FormatString(string text)
+    private  double[][] _irisVals = null!;
+    private  string[] _irisNames = null!;
+    private string baseFileName { get; set; }
+
+    public Classifier(string baseFileName)
     {
-        
+        this.baseFileName = baseFileName;
+    }
+    
+    public  string LoadBaseFile()
+    {
+        return File.ReadAllText(baseFileName);
+    }
+    
+    public void FormatFile()
+    {
+        string text = LoadBaseFile();
         string[] lines = text.Split('\n');
         _irisVals = new double[lines.Length-1][];
         _irisNames = new string[lines.Length-1];
@@ -42,12 +51,10 @@ public class Classifier
             _irisNames[i-1] = tempArr[4].Trim();
         }
         
-        
-        return _irisVals;
     }
     
     
-    public static double Distance(double[] a,  double[] b)
+    public  double Distance(double[] a,  double[] b)
     {
         if (a.Length == b.Length)
         {
@@ -62,12 +69,12 @@ public class Classifier
             return -1.0;
     }
 
-    public static void ClassifyVector(double[] newVector)
+    public  void ClassifyVector(double[] newVector)
     {
         Console.WriteLine(Knn(10,  newVector));
     }
 
-    public static void ClassifyFile(string fileName)
+    public  void ClassifyFile(string fileName)
     {
         string text = File.ReadAllText(fileName);
         var lines = text.Split("\r\n");
@@ -88,7 +95,7 @@ public class Classifier
 
     }
 
-    public static string Knn(int k, double[] newVector)
+    public  string Knn(int k, double[] newVector)
     {
         double[] distances = new double[_irisNames.Length];
         Dictionary<string, int> irisResArr = new Dictionary<string, int>()
@@ -114,10 +121,34 @@ public class Classifier
         
         for (int i = 0; i < k; i++)
             irisResArr[_irisNames[i]]++;
-        
-        
+
         var maxKvp = irisResArr.MaxBy(x => x.Value);
+        
         return maxKvp.Key;
+    }
+
+    public void trainData()
+    {
+        FormatFile();
+
+        List<double[]> trainingSetVals = new List<double[]>();
+        List<string> trainingSetNames = new List<string>();
+        List<double[]> testSetVals = new List<double[]>();
+        List<string> testSetNames = new List<string>();
+
+        for (int i = 0; i < _irisNames.Length; i++)
+        {
+            if (i % 50 < 30)
+            {
+                trainingSetVals.Add(_irisVals[i]);
+                trainingSetNames.Add(_irisNames[i]);
+            }
+            else
+            {
+                testSetVals.Add(_irisVals[i]);
+                testSetNames.Add(_irisNames[i]);
+            }
+        }
     }
         
 }
