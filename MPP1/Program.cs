@@ -8,7 +8,9 @@ class Program
     static void Main(string[] args)
     {
         Classifier classifier = new Classifier("iris.txt");
-        classifier.ClassifyFile("temp.txt");
+        classifier.ReadInput();
+        
+        
 
     }
 }
@@ -17,11 +19,53 @@ public class Classifier (string baseFileName)
 {
     private  double[][] _irisVals = null!;
     private  string[] _irisNames = null!;
+    
+    
     private string BaseFileName { get; set; } = baseFileName;
     
     private string LoadBaseFile()
     {
-        return File.ReadAllText(BaseFileName);
+          return File.ReadAllText(BaseFileName);
+    }
+
+    public void ReadInput()
+    {
+        string? input = "";
+        
+        while (input.ToLower() != "quit")
+        {
+            
+            input = Console.ReadLine();
+            
+            switch (input)
+            {
+                case "1":
+                    Console.WriteLine("Enter vector: ");
+                    string? givenVector =  Console.ReadLine();
+                    
+                    string[] sepString = givenVector.Split(',');
+                    double[] newVector = new double[sepString.Length];
+                    
+                    for (int i = 0; i<sepString.Length; i++)
+                        newVector[i] = double.Parse(sepString[i], CultureInfo.InvariantCulture);
+                    
+                    ClassifyVector(newVector);
+                    break;
+                
+                case "2":
+                    Console.WriteLine("Enter file name: ");
+                    string? fileName = Console.ReadLine();
+                    ClassifyFile(fileName);
+                    Console.WriteLine("File has been created");
+                    break;
+                
+                case "3":
+                    Console.WriteLine("Enter k for training");
+                    int k =  int.Parse(Console.ReadLine());
+                    TrainData(k);
+                    break;
+            }
+        }
     }
 
     private void FormatFile()
@@ -34,27 +78,21 @@ public class Classifier (string baseFileName)
         for (int i = 1; i < lines.Length; i++)
         {
             string[] tempArr= lines[i].Split(',');
-                        
-
+            
             _irisVals[i-1] = new double[4];
             for (int j = 0; j < 4; j++)
             {
                 _irisVals[i-1][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
             }
-            
-            
             _irisNames[i-1] = tempArr[4].Trim();
         }
-        
     }
-    
     
     public  double Distance(double[] a,  double[] b)
     {
         if (a.Length == b.Length)
         {
             double dist = 0.0;
-
             for (int i = 0; i < a.Length; i++)
                 dist += Math.Pow(Math.Abs(a[i] - b[i]), 2);
 
@@ -124,7 +162,7 @@ public class Classifier (string baseFileName)
         return maxKvp.Key;
     }
 
-    public void trainData()
+    public void TrainData(int k)
     {
         FormatFile();
 
@@ -150,7 +188,7 @@ public class Classifier (string baseFileName)
         List<int> resultTable = new List<int>();
         for (int i = 0; i < testSetVals.Count; i++)
         {
-            if (Knn(11, testSetVals[i], trainingSetVals.ToArray(), trainingSetNames.ToArray()) == testSetNames[i])
+            if (Knn(k, testSetVals[i], trainingSetVals.ToArray(), trainingSetNames.ToArray()) == testSetNames[i])
             {
                 resultTable.Add(1);
             }
