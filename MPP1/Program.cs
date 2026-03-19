@@ -31,10 +31,12 @@ public class Classifier (string baseFileName)
     public void ReadInput()
     {
         string? input = "";
+        FormatFile();
         
         while (input.ToLower() != "quit")
         {
-            
+            Console.WriteLine("\nMENU\n==========================");
+            Console.WriteLine("[1] - Classify single vector\t[2] - Classify vectors from file\t[3] - Check accuracy");
             input = Console.ReadLine();
             
             switch (input)
@@ -109,9 +111,9 @@ public class Classifier (string baseFileName)
 
     public  void ClassifyFile(string fileName)
     {
-        FormatFile();
-        File.WriteAllText("C:\\Users\\aleks\\RiderProjects\\MPP1\\MPP1\\result.txt","");
+        File.WriteAllText("result.txt","");
         string text = File.ReadAllText(fileName);
+        Console.WriteLine(text);
         var lines = text.Split("\r\n");
         var userVals  = new double[lines.Length][];
         
@@ -123,7 +125,7 @@ public class Classifier (string baseFileName)
             for (int j = 0; j < 4; j++)
                 userVals[i][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
 
-            File.AppendAllText("C:\\Users\\aleks\\RiderProjects\\MPP1\\MPP1\\result.txt", Knn(10, userVals[i], _irisVals, _irisNames)+"\n");
+            File.AppendAllText("result.txt", Knn(10, userVals[i], _irisVals, _irisNames)+"\n");
                 
         }
         
@@ -132,6 +134,7 @@ public class Classifier (string baseFileName)
 
     public  string Knn(int k, double[] newVector, double[][] values, string[] names)
     {
+
         double[] distances = new double[names.Length];
         Dictionary<string, int> irisResMap = new Dictionary<string, int>()
         {
