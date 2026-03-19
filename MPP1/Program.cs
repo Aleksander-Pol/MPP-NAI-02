@@ -8,28 +8,23 @@ class Program
     static void Main(string[] args)
     {
         Classifier classifier = new Classifier("iris.txt");
-        classifier.trainData();
+        classifier.ClassifyFile("temp.txt");
 
     }
 }
 
-public class Classifier
+public class Classifier (string baseFileName)
 {
     private  double[][] _irisVals = null!;
     private  string[] _irisNames = null!;
-    private string baseFileName { get; set; }
+    private string BaseFileName { get; set; } = baseFileName;
+    
+    private string LoadBaseFile()
+    {
+        return File.ReadAllText(BaseFileName);
+    }
 
-    public Classifier(string baseFileName)
-    {
-        this.baseFileName = baseFileName;
-    }
-    
-    public  string LoadBaseFile()
-    {
-        return File.ReadAllText(baseFileName);
-    }
-    
-    public void FormatFile()
+    private void FormatFile()
     {
         string text = LoadBaseFile();
         string[] lines = text.Split('\n');
@@ -76,6 +71,8 @@ public class Classifier
 
     public  void ClassifyFile(string fileName)
     {
+        FormatFile();
+        File.WriteAllText("C:\\Users\\aleks\\RiderProjects\\MPP1\\MPP1\\result.txt","");
         string text = File.ReadAllText(fileName);
         var lines = text.Split("\r\n");
         var userVals  = new double[lines.Length][];
@@ -88,7 +85,7 @@ public class Classifier
             for (int j = 0; j < 4; j++)
                 userVals[i][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
 
-            Console.WriteLine(Knn(10, userVals[i], _irisVals, _irisNames));
+            File.AppendAllText("C:\\Users\\aleks\\RiderProjects\\MPP1\\MPP1\\result.txt", Knn(10, userVals[i], _irisVals, _irisNames)+"\n");
                 
         }
         
@@ -98,7 +95,7 @@ public class Classifier
     public  string Knn(int k, double[] newVector, double[][] values, string[] names)
     {
         double[] distances = new double[names.Length];
-        Dictionary<string, int> irisResArr = new Dictionary<string, int>()
+        Dictionary<string, int> irisResMap = new Dictionary<string, int>()
         {
             { "Iris-setosa", 0},
             { "Iris-versicolor", 0},
@@ -120,9 +117,9 @@ public class Classifier
         }
         
         for (int i = 0; i < k; i++)
-            irisResArr[names[i]]++;
+            irisResMap[names[i]]++;
 
-        var maxKvp = irisResArr.MaxBy(x => x.Value);
+        var maxKvp = irisResMap.MaxBy(x => x.Value);
         
         return maxKvp.Key;
     }
