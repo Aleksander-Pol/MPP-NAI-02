@@ -134,7 +134,8 @@ public class Classifier (string baseFileName)
 
     public  string Knn(int k, double[] newVector, double[][] values, string[] names)
     {
-
+        
+        var copyNames = names.Clone() as string[];
         double[] distances = new double[names.Length];
         Dictionary<string, int> irisResMap = new Dictionary<string, int>()
         {
@@ -142,7 +143,7 @@ public class Classifier (string baseFileName)
             { "Iris-versicolor", 0},
             { "Iris-virginica", 0},
         };
-
+        
         for (int i = 0; i < distances.Length; i++)
         {
             distances[i] = Distance(values[i], newVector);
@@ -151,14 +152,13 @@ public class Classifier (string baseFileName)
                 if (distances[i] < distances[j])
                 {
                     (distances[i], distances[j]) = (distances[j], distances[i]);
-                    (names[i], names[j]) =  (names[j], names[i]);
-                    (values[i], values[j]) =  (values[j], values[i]);
+                    (copyNames[i], copyNames[j]) =  (copyNames[j], copyNames[i]);
                 }
             }
         }
         
         for (int i = 0; i < k; i++)
-            irisResMap[names[i]]++;
+            irisResMap[copyNames[i]]++;
 
         var maxKvp = irisResMap.MaxBy(x => x.Value);
         
