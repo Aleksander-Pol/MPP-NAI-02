@@ -18,9 +18,10 @@ class Program
         {
             for (int j = 0; j < classifier.IrisResVals.Length; j++)
                 p.Learn(classifier.IrisVals[j], classifier.IrisResVals[j], 0.5, 0.2);
+                
+            
         }
-
-
+        
     }
 }
 
@@ -142,7 +143,7 @@ public class Classifier (string baseFileName)
 
     public  void ClassifyVector(double[] newVector)
     {
-        Console.WriteLine(Knn(10,  newVector, IrisVals,  _irisNames));
+        Console.WriteLine(Knn(3,  newVector, IrisVals,  _irisNames));
     }
 
     public  void ClassifyFile(string fileName)

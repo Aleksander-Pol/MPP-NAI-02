@@ -1,4 +1,6 @@
-﻿namespace MPP1;
+﻿using System.Globalization;
+
+namespace MPP1;
 
 public class Perceptron (double[] weightVector, double bias)
 {
@@ -35,4 +37,13 @@ public class Perceptron (double[] weightVector, double bias)
         Bias -= subPartTheta;
     }
 
+    public override string ToString()
+    {
+        foreach (var VARIABLE in WeightVector)
+        {
+            Console.Write(VARIABLE + " ");
+        }
+
+        return Bias.ToString(CultureInfo.InvariantCulture);
+    }
 }
