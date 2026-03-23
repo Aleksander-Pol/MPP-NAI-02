@@ -24,7 +24,7 @@ public class Perceptron (double[] weightVector, double bias)
 
     public void Learn(double[] x, int d, double a, double b)
     {
-        int y = Classify(x)==1? 1 : -1;
+        int y = Classify(x);
         int pom = d - y;
         double subPartWeightVector = pom * a;
         double subPartTheta = pom * b;

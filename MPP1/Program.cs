@@ -8,7 +8,8 @@ class Program
     static void Main(string[] args)
     {
         Classifier classifier = new Classifier("iris.txt");
-        classifier.ReadInput();
+        classifier.FormatPerceptronText();
+        
         
         
 
@@ -67,6 +68,26 @@ public class Classifier (string baseFileName)
                     TrainData(k);
                     break;
             }
+        }
+    }
+
+    public void FormatPerceptronText()
+    {
+        string text = LoadBaseFile();
+        string[] lines = text.Split('\n');
+        _irisVals = new double[lines.Length-1][];
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            string[] tempArr = lines[i].Split(',');
+            _irisVals[i-1] = new double[5];
+
+            for (int j = 0; j < 4; j++)
+            {
+                _irisVals[i-1][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
+            }
+
+            _irisVals[i - 1][4] = tempArr[4].Trim() == "Iris-setosa" ? 1.0 : 0.0;
         }
     }
 
