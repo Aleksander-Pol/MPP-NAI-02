@@ -9,16 +9,25 @@ class Program
     {
         Classifier classifier = new Classifier("iris.txt");
         classifier.FormatPerceptronText();
-        
-        
-        
+
+
+        Perceptron p = new Perceptron([2.0, 1.0, 3.0, 7.0], 2);
+        int repetitions = 1000;
+
+        for (int i = 0; i < repetitions; i++)
+        {
+            for (int j = 0; j < classifier.IrisResVals.Length; j++)
+                p.Learn(classifier.IrisVals[j], classifier.IrisResVals[j], 0.5, 0.2);
+        }
+
 
     }
 }
 
 public class Classifier (string baseFileName)
 {
-    private  double[][] _irisVals = null!;
+    public  double[][] IrisVals { get; set; } = null!;
+    public int[] IrisResVals { get; set; }= null!;
     private  string[] _irisNames = null!;
     
     
@@ -71,41 +80,47 @@ public class Classifier (string baseFileName)
         }
     }
 
-    public void FormatPerceptronText()
+    public double[][] FormatPerceptronText()
     {
         string text = LoadBaseFile();
         string[] lines = text.Split('\n');
-        _irisVals = new double[lines.Length-1][];
+        IrisVals = new double[lines.Length-1][];
+        IrisResVals = new int[lines.Length-1];
+        
 
         for (int i = 1; i < lines.Length; i++)
         {
             string[] tempArr = lines[i].Split(',');
-            _irisVals[i-1] = new double[5];
+            IrisVals[i-1] = new double[4];
 
             for (int j = 0; j < 4; j++)
             {
-                _irisVals[i-1][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
+                IrisVals[i-1][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
             }
 
-            _irisVals[i - 1][4] = tempArr[4].Trim() == "Iris-setosa" ? 1.0 : 0.0;
+            IrisResVals[i - 1] = tempArr[4].Trim() == "Iris-setosa" ? 1 : 0;
         }
+
+        return IrisVals;
     }
 
+    
+    
     private void FormatFile()
     {
         string text = LoadBaseFile();
         string[] lines = text.Split('\n');
-        _irisVals = new double[lines.Length-1][];
+        IrisVals = new double[lines.Length-1][];
         _irisNames = new string[lines.Length-1];
         
         for (int i = 1; i < lines.Length; i++)
         {
             string[] tempArr= lines[i].Split(',');
             
-            _irisVals[i-1] = new double[4];
+            IrisVals[i-1] = new double[4];
             for (int j = 0; j < 4; j++)
             {
-                _irisVals[i-1][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
+                IrisVals[i-1][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
             }
             _irisNames[i-1] = tempArr[4].Trim();
         }
@@ -127,7 +142,7 @@ public class Classifier (string baseFileName)
 
     public  void ClassifyVector(double[] newVector)
     {
-        Console.WriteLine(Knn(10,  newVector, _irisVals,  _irisNames));
+        Console.WriteLine(Knn(10,  newVector, IrisVals,  _irisNames));
     }
 
     public  void ClassifyFile(string fileName)
@@ -146,7 +161,7 @@ public class Classifier (string baseFileName)
             for (int j = 0; j < 4; j++)
                 userVals[i][j] = double.Parse(tempArr[j], CultureInfo.InvariantCulture);
 
-            File.AppendAllText("result.txt", Knn(10, userVals[i], _irisVals, _irisNames)+"\n");
+            File.AppendAllText("result.txt", Knn(10, userVals[i], IrisVals, _irisNames)+"\n");
                 
         }
         
@@ -199,12 +214,12 @@ public class Classifier (string baseFileName)
         {
             if (i % 50 < 30)
             {
-                trainingSetVals.Add(_irisVals[i]);
+                trainingSetVals.Add(IrisVals[i]);
                 trainingSetNames.Add(_irisNames[i]);
             }
             else
             {
-                testSetVals.Add(_irisVals[i]);
+                testSetVals.Add(IrisVals[i]);
                 testSetNames.Add(_irisNames[i]);
             }
         }
