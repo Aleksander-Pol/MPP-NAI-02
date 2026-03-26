@@ -5,7 +5,7 @@ namespace MPP1;
 public class Perceptron (double[] weightVector, double bias)
 {
     private double[] WeightVector{get;} = weightVector;
-    private double Bias { get; set; } = bias;
+    public double Bias { get; set; } = bias;
 
     public int Classify(double[] x)
     {
@@ -44,6 +44,6 @@ public class Perceptron (double[] weightVector, double bias)
             Console.Write(VARIABLE + " ");
         }
 
-        return Bias.ToString(CultureInfo.InvariantCulture);
+        return " -> " +  Bias.ToString(CultureInfo.InvariantCulture);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Security.AccessControl;
 
 namespace MPP1;
 
@@ -8,27 +7,14 @@ class Program
     static void Main(string[] args)
     {
         Classifier classifier = new Classifier("iris.txt");
-        classifier.FormatPerceptronText();
-
-
-        Perceptron p = new Perceptron([2.0, 1.0, 3.0, 7.0], 2);
-        int repetitions = 1000;
-
-        for (int i = 0; i < repetitions; i++)
-        {
-            for (int j = 0; j < classifier.IrisResVals.Length; j++)
-                p.Learn(classifier.IrisVals[j], classifier.IrisResVals[j], 0.5, 0.2);
-                
-            
-        }
-        
+        classifier.ReadInput();
     }
 }
 
 public class Classifier (string baseFileName)
 {
-    public  double[][] IrisVals { get; set; } = null!;
-    public int[] IrisResVals { get; set; }= null!;
+    private double[][] IrisVals { get; set; } = null!;
+    private int[] IrisResVals { get; set; }= null!;
     private  string[] _irisNames = null!;
     
     
@@ -44,10 +30,10 @@ public class Classifier (string baseFileName)
         string? input = "";
         FormatFile();
         
-        while (input.ToLower() != "quit")
+        while (input?.ToLower() != "quit")
         {
             Console.WriteLine("\nMENU\n==========================");
-            Console.WriteLine("[1] - Classify single vector\t[2] - Classify vectors from file\t[3] - Check accuracy");
+            Console.WriteLine("[1] - Classify single vector\t[2] - Classify vectors from file\t[3] - Check accuracy\t[4] - Test perceptron");
             input = Console.ReadLine();
             
             switch (input)
@@ -56,27 +42,48 @@ public class Classifier (string baseFileName)
                     Console.WriteLine("Enter vector: ");
                     string? givenVector =  Console.ReadLine();
                     
-                    string[] sepString = givenVector.Split(',');
-                    double[] newVector = new double[sepString.Length];
+                    string[]? sepString = givenVector?.Split(',');
+                    if (sepString != null)
+                    {
+                        double[] newVector = new double[sepString.Length];
                     
-                    for (int i = 0; i<sepString.Length; i++)
-                        newVector[i] = double.Parse(sepString[i], CultureInfo.InvariantCulture);
+                        for (int i = 0; i<sepString.Length; i++)
+                            newVector[i] = double.Parse(sepString[i], CultureInfo.InvariantCulture);
                     
-                    ClassifyVector(newVector);
+                        ClassifyVector(newVector);
+                    }
+
                     break;
                 
                 case "2":
                     Console.WriteLine("Enter file name: ");
                     string? fileName = Console.ReadLine();
-                    ClassifyFile(fileName);
+                    if (fileName != null) ClassifyFile(fileName);
                     Console.WriteLine("File has been created");
                     break;
                 
                 case "3":
                     Console.WriteLine("Enter k for training");
-                    int k =  int.Parse(Console.ReadLine());
+                    int k =  int.Parse(Console.ReadLine() ?? string.Empty);
                     TrainData(k);
                     break;
+                case "4":
+                    Console.WriteLine("Enter number of eras: ");
+                    int repetitions = Int32.Parse(Console.ReadLine() ?? string.Empty);
+                    Console.WriteLine("Enter weight vector: ");
+                    string weightVector = Console.ReadLine();
+                    double [] weightVectorArray = weightVector.Split(',').Select(x => double.Parse(x,CultureInfo.InvariantCulture)).ToArray();
+                    Console.WriteLine("Enter bias: ");
+                    double bias = double.Parse(Console.ReadLine() ?? string.Empty);
+                    Perceptron p = new Perceptron(weightVectorArray, bias);
+                    Console.WriteLine("Enter alfa: ");
+                    double a =  double.Parse(Console.ReadLine() ?? string.Empty, CultureInfo.InvariantCulture);
+                    Console.WriteLine("Enter beta: ");
+                    double b = double.Parse(Console.ReadLine() ?? string.Empty, CultureInfo.InvariantCulture);
+                    
+                    TestPerceptronAccuracy(repetitions, p, a, b);
+                    break;
+                    
             }
         }
     }
@@ -126,8 +133,8 @@ public class Classifier (string baseFileName)
             _irisNames[i-1] = tempArr[4].Trim();
         }
     }
-    
-    public  double Distance(double[] a,  double[] b)
+
+    private double Distance(double[] a,  double[] b)
     {
         if (a.Length == b.Length)
         {
@@ -141,12 +148,12 @@ public class Classifier (string baseFileName)
             return -1.0;
     }
 
-    public  void ClassifyVector(double[] newVector)
+    private void ClassifyVector(double[] newVector)
     {
         Console.WriteLine(Knn(3,  newVector, IrisVals,  _irisNames));
     }
 
-    public  void ClassifyFile(string fileName)
+    private void ClassifyFile(string fileName)
     {
         File.WriteAllText("result.txt","");
         string text = File.ReadAllText(fileName);
@@ -169,12 +176,12 @@ public class Classifier (string baseFileName)
 
     }
 
-    public  string Knn(int k, double[] newVector, double[][] values, string[] names)
+    private string Knn(int k, double[] newVector, double[][] values, string[] names)
     {
         
         var copyNames = names.Clone() as string[];
         double[] distances = new double[names.Length];
-        Dictionary<string, int> irisResMap = new Dictionary<string, int>()
+        Dictionary<string?, int> irisResMap = new Dictionary<string?, int>()
         {
             { "Iris-setosa", 0},
             { "Iris-versicolor", 0},
@@ -189,20 +196,59 @@ public class Classifier (string baseFileName)
                 if (distances[i] < distances[j])
                 {
                     (distances[i], distances[j]) = (distances[j], distances[i]);
-                    (copyNames[i], copyNames[j]) =  (copyNames[j], copyNames[i]);
+                    if (copyNames != null) (copyNames[i], copyNames[j]) = (copyNames[j], copyNames[i]);
                 }
             }
         }
         
         for (int i = 0; i < k; i++)
-            irisResMap[copyNames[i]]++;
+            irisResMap[copyNames?[i]]++;
 
         var maxKvp = irisResMap.MaxBy(x => x.Value);
         
         return maxKvp.Key;
     }
 
-    public void TrainData(int k)
+    public void TestPerceptronAccuracy(int repetitions, Perceptron p, double a, double b)
+    {
+        FormatPerceptronText();
+        
+        List<double[]> trainingSetVals = new List<double[]>();
+        List<int> trainingSetResults = new List<int>();
+        List<double[]> testSetVals = new List<double[]>();
+        List<int> testSetResults = new List<int>();
+
+        int sum = 0;
+        
+        for (int i = 0; i < IrisVals.Length; i++)
+        {
+            if (i % 50 < 30)
+            {
+                trainingSetVals.Add(IrisVals[i]);
+                trainingSetResults.Add(IrisResVals[i]);
+            }
+            else
+            {
+                testSetVals.Add(IrisVals[i]);
+                testSetResults.Add(IrisResVals[i]);
+            }
+        }
+        
+        
+        for (int i = 0; i < repetitions; i++)
+        {
+            for (int j = 0; j < trainingSetVals.Count; j++)
+                p.Learn(trainingSetVals[j], trainingSetResults[j], a, b);
+        }
+        
+        for (int i = 0; i < testSetVals.Count; i++)
+            if (p.Classify(testSetVals[i]) == testSetResults[i]) sum++;
+        
+        double result = ((double)sum / testSetVals.Count) * 100;
+        Console.WriteLine($"Udało się zdobyć - {result}%");
+    }
+
+    private void TrainData(int k)
     {
         FormatFile();
 
@@ -236,7 +282,7 @@ public class Classifier (string baseFileName)
                 resultTable.Add(0);
         }
         
-        double result = (double)resultTable.Sum()/(double)resultTable.Count * 100;
+        double result = resultTable.Sum()/(double)resultTable.Count * 100;
 
         Console.WriteLine($"Udało się zdobyć - {result}%");
     }
