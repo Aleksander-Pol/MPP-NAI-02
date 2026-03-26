@@ -80,7 +80,7 @@ public class Classifier (string baseFileName)
             }
         }
     }
-    public double[][] FormatPerceptronText()
+    private double[][] FormatPerceptronText()
     {
         string text = LoadBaseFile();
         string[] lines = text.Split('\n');
@@ -103,7 +103,7 @@ public class Classifier (string baseFileName)
 
         return IrisVals;
     }
-    public void TestPerceptronAccuracy(int repetitions, Perceptron p, double a, double b)
+    private void TestPerceptronAccuracy(int repetitions, Perceptron p, double a, double b)
         {
             FormatPerceptronText();
             
@@ -111,6 +111,8 @@ public class Classifier (string baseFileName)
             List<int> trainingSetResults = new List<int>();
             List<double[]> testSetVals = new List<double[]>();
             List<int> testSetResults = new List<int>();
+
+            List<double> biasHistory = new List<double>();
     
             int sum = 0;
             
@@ -133,13 +135,19 @@ public class Classifier (string baseFileName)
             {
                 for (int j = 0; j < trainingSetVals.Count; j++)
                     p.Learn(trainingSetVals[j], trainingSetResults[j], a, b);
+                
+                biasHistory.Add(p.Bias);                    
             }
             
             for (int i = 0; i < testSetVals.Count; i++)
                 if (p.Classify(testSetVals[i]) == testSetResults[i]) sum++;
             
             double result = ((double)sum / testSetVals.Count) * 100;
-            Console.WriteLine($"Udało się zdobyć - {result}%");
+            Console.WriteLine($"Accuracy - {result}%");
+            Console.WriteLine("Show bias history over eras?");
+            if (Console.Read()=='1')
+                for(int i = 0; i< biasHistory.Count; i++)
+                    Console.WriteLine($"{i} era: {biasHistory[i]:F2}");
         }
     
     
