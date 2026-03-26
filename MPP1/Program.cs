@@ -16,15 +16,8 @@ public class Classifier (string baseFileName)
     private double[][] IrisVals { get; set; } = null!;
     private int[] IrisResVals { get; set; }= null!;
     private  string[] _irisNames = null!;
-    
-    
     private string BaseFileName { get; set; } = baseFileName;
     
-    private string LoadBaseFile()
-    {
-          return File.ReadAllText(BaseFileName);
-    }
-
     public void ReadInput()
     {
         string? input = "";
@@ -87,7 +80,6 @@ public class Classifier (string baseFileName)
             }
         }
     }
-
     public double[][] FormatPerceptronText()
     {
         string text = LoadBaseFile();
@@ -111,9 +103,51 @@ public class Classifier (string baseFileName)
 
         return IrisVals;
     }
-
+    public void TestPerceptronAccuracy(int repetitions, Perceptron p, double a, double b)
+        {
+            FormatPerceptronText();
+            
+            List<double[]> trainingSetVals = new List<double[]>();
+            List<int> trainingSetResults = new List<int>();
+            List<double[]> testSetVals = new List<double[]>();
+            List<int> testSetResults = new List<int>();
+    
+            int sum = 0;
+            
+            for (int i = 0; i < IrisVals.Length; i++)
+            {
+                if (i % 50 < 30)
+                {
+                    trainingSetVals.Add(IrisVals[i]);
+                    trainingSetResults.Add(IrisResVals[i]);
+                }
+                else
+                {
+                    testSetVals.Add(IrisVals[i]);
+                    testSetResults.Add(IrisResVals[i]);
+                }
+            }
+            
+            
+            for (int i = 0; i < repetitions; i++)
+            {
+                for (int j = 0; j < trainingSetVals.Count; j++)
+                    p.Learn(trainingSetVals[j], trainingSetResults[j], a, b);
+            }
+            
+            for (int i = 0; i < testSetVals.Count; i++)
+                if (p.Classify(testSetVals[i]) == testSetResults[i]) sum++;
+            
+            double result = ((double)sum / testSetVals.Count) * 100;
+            Console.WriteLine($"Udało się zdobyć - {result}%");
+        }
     
     
+    
+    private string LoadBaseFile()
+        {
+              return File.ReadAllText(BaseFileName);
+        }
     private void FormatFile()
     {
         string text = LoadBaseFile();
@@ -133,7 +167,6 @@ public class Classifier (string baseFileName)
             _irisNames[i-1] = tempArr[4].Trim();
         }
     }
-
     private double Distance(double[] a,  double[] b)
     {
         if (a.Length == b.Length)
@@ -147,12 +180,10 @@ public class Classifier (string baseFileName)
         else
             return -1.0;
     }
-
     private void ClassifyVector(double[] newVector)
     {
         Console.WriteLine(Knn(3,  newVector, IrisVals,  _irisNames));
     }
-
     private void ClassifyFile(string fileName)
     {
         File.WriteAllText("result.txt","");
@@ -175,7 +206,6 @@ public class Classifier (string baseFileName)
         
 
     }
-
     private string Knn(int k, double[] newVector, double[][] values, string[] names)
     {
         
@@ -208,46 +238,6 @@ public class Classifier (string baseFileName)
         
         return maxKvp.Key;
     }
-
-    public void TestPerceptronAccuracy(int repetitions, Perceptron p, double a, double b)
-    {
-        FormatPerceptronText();
-        
-        List<double[]> trainingSetVals = new List<double[]>();
-        List<int> trainingSetResults = new List<int>();
-        List<double[]> testSetVals = new List<double[]>();
-        List<int> testSetResults = new List<int>();
-
-        int sum = 0;
-        
-        for (int i = 0; i < IrisVals.Length; i++)
-        {
-            if (i % 50 < 30)
-            {
-                trainingSetVals.Add(IrisVals[i]);
-                trainingSetResults.Add(IrisResVals[i]);
-            }
-            else
-            {
-                testSetVals.Add(IrisVals[i]);
-                testSetResults.Add(IrisResVals[i]);
-            }
-        }
-        
-        
-        for (int i = 0; i < repetitions; i++)
-        {
-            for (int j = 0; j < trainingSetVals.Count; j++)
-                p.Learn(trainingSetVals[j], trainingSetResults[j], a, b);
-        }
-        
-        for (int i = 0; i < testSetVals.Count; i++)
-            if (p.Classify(testSetVals[i]) == testSetResults[i]) sum++;
-        
-        double result = ((double)sum / testSetVals.Count) * 100;
-        Console.WriteLine($"Udało się zdobyć - {result}%");
-    }
-
     private void TrainData(int k)
     {
         FormatFile();
